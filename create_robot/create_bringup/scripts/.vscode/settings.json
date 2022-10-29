@@ -1,0 +1,14 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/rushi/create_ws/devel/lib/python3/dist-packages",
+        "/home/rushi/catkin_ws/devel/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages",
+        "/path/to/habitat-sim/"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/rushi/create_ws/devel/lib/python3/dist-packages",
+        "/home/rushi/catkin_ws/devel/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages",
+        "/path/to/habitat-sim/"
+    ]
+}

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+
+  <include file="$(find create_bringup)//home/ai4ce/create_ws/src/create_robot/create_bringup/launch/create_2.launch"/>
+  <!-- <include file="$(find velodyne)//home/ai4ce/create_ws/src/velodyne/velodyne_pointcloud/VLP16_points.launch"/> -->
+
+  <node name="teleop_twist_keyboard" pkg="create_bringup" type="teleop.py" 	output="screen"/>
+  <!-- <node name="cam_node" pkg="create_bringup" type="ros_cam.py" output="screen"/> -->
+  <node name="odom_node" pkg="create_bringup" type="odom.py" 	output="screen"/>
+  <!-- <node name="sync_time" pkg="create_bringup" type="sync.py" 	output="screen"/> -->
+
+</launch>

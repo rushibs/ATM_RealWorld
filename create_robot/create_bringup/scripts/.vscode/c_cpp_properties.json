@@ -1,0 +1,26 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/rushi/create_ws/devel/include/**",
+        "/opt/ros/noetic/include/**",
+        "/home/rushi/catkin_ws/devel/include/**",
+        "/home/rushi/catkin_ws/src/beginner_tutorials/include/**",
+        "/home/rushi/create_ws/src/create_robot/create_driver/include/**",
+        "/home/rushi/catkin_ws/src/ros_basics_tutorials/include/**",
+        "/home/rushi/catkin_ws/src/ros_essentials_cpp/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}
