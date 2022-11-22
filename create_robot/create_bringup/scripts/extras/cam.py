@@ -17,7 +17,7 @@ writer= cv2.VideoWriter('/home/rushi/create_ws/src/create_robot/create_bringup/s
 while(cap.isOpened()):
     ret, frame = cap.read()
     if ret:
-        fps = int(cap.get(30))
+        fps = int(cap.get(5))
         print("fps:", fps)
         # Display the resulting frame
         writer.write(frame)

@@ -1,5 +1,5 @@
-#!/usr/bin/env python2
-# from json import detect_encoding
+#!/usr/bin/env python3
+from json import detect_encoding
 import threading
 import time
 import roslib; roslib.load_manifest('teleop_twist_keyboard')
@@ -9,7 +9,6 @@ from std_msgs.msg import Float64, Int64
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import TwistStamped
 from create_msgs.msg import my_msg
-from camera import capture
 
 import sys
 from select import select
@@ -217,7 +216,6 @@ def odom_callback(msg):
             twist_msg2.linear.x = 0
             twist_msg2.angular.z = 0
             publisher.publish(twist_msg2)
-            # capture()
         pose = dist
     
     if ang >= (turn_angle+0.174532925):

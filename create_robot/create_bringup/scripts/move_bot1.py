@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+
 # from json import detect_encoding
 import threading
 import time
@@ -9,7 +10,7 @@ from std_msgs.msg import Float64, Int64
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import TwistStamped
 from create_msgs.msg import my_msg
-from camera import capture
+from camera import capture, check_state, connect
 
 import sys
 from select import select
@@ -217,8 +218,12 @@ def odom_callback(msg):
             twist_msg2.linear.x = 0
             twist_msg2.angular.z = 0
             publisher.publish(twist_msg2)
-            # capture()
         pose = dist
+        header = connect()
+        check_state(header)
+        capture(header)
+
+        
     
     if ang >= (turn_angle+0.174532925):
         # print("angle = ", ang)
@@ -310,4 +315,3 @@ if __name__=="__main__":
     finally:
         pub_thread.stop()
         restoreTerminalSettings(settings)
-
