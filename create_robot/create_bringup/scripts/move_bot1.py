@@ -208,6 +208,7 @@ def odom_callback(msg):
     dist = msg.distance
     ang = msg.angle
     if dist >= (pose+0.25): 
+        header = connect()
         # print("dist = ", dist)
         print("Capture Image")
         t_end = time.time() + 60 * 0.05
@@ -219,9 +220,12 @@ def odom_callback(msg):
             twist_msg2.angular.z = 0
             publisher.publish(twist_msg2)
         pose = dist
-        header = connect()
-        check_state(header)
+        # header = connect()
+        # check_state(header)
         capture(header)
+        print('sleeping')
+        time.sleep(5)
+        print('awake')
 
         
     
@@ -258,7 +262,7 @@ if __name__=="__main__":
     rospy.init_node('teleop_twist_keyboard1')
     speed = rospy.get_param("~speed", 0.1)
     turn = rospy.get_param("~turn", 1.0)
-    repeat = rospy.get_param("~repeat_rate", 0.0)
+    repeat = rospy.get_param("~repeat_rate", 10.0)
     key_timeout = rospy.get_param("~key_timeout", 0.5)
     stamped = rospy.get_param("~stamped", False)
     twist_frame = rospy.get_param("~frame_id", '')

@@ -141,8 +141,9 @@ def capture(header):
 
   with open(r'/home/ai4ce/create_ws/src/create_robot/create_bringup/scripts/test.jpeg','wb') as f:
       f.write(pic.content)
+  # print('sleeping')
+  # time.sleep(5)
+  # print('awake')
+  # c = requests.close('http://192.168.1.188:20000/osc/commands/execute')
 
-  
-  c = requests.post('http://192.168.1.188:20000/osc/commands/execute', headers = {'Connection' : 'close'})
-  
 # plt.imshow(pic.content)
