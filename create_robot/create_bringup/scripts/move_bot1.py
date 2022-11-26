@@ -11,6 +11,7 @@ from geometry_msgs.msg import Twist
 from geometry_msgs.msg import TwistStamped
 from create_msgs.msg import my_msg
 from camera import capture, check_state, connect
+from transfer_data import transfer_image
 
 import sys
 from select import select
@@ -65,6 +66,8 @@ moveBindings = {
         't':(0,0,1,0),
         'b':(0,0,-1,0),
     }
+
+move_signals = {3:[1,0,0,0]}
 
 speedBindings={
         'q':(1.1,1.1),
@@ -199,33 +202,42 @@ def vels(speed, turn):
 
 pose = 0.0
 turn_angle = 0.0
+frame = 0
+signal = 3
+
 def odom_callback(msg):
-    global pose, turn_angle
+    global pose, turn_angle, frame, signal
     publisher = rospy.Publisher('cmd_vel', Twist, queue_size = 10)
     twist_msg2 = TwistMsg()
     distance = my_msg()
     angle = my_msg()
     dist = msg.distance
     ang = msg.angle
+
+    signals = [1,2,3]
+    if signal in signals:
+        twist_msg2.linear.x = 0.1
+        twist_msg2.angular.z = 0
+        publisher.publish(twist_msg2)
+
     if dist >= (pose+0.25): 
         header = connect()
-        # print("dist = ", dist)
         print("Capture Image")
         t_end = time.time() + 60 * 0.05
         while time.time() < t_end:
-            # if cv2.waitKey(10) == ord('h'):
-            #     print("teleop capture")
-            # print("stopped")
             twist_msg2.linear.x = 0
             twist_msg2.angular.z = 0
             publisher.publish(twist_msg2)
+           
         pose = dist
-        # header = connect()
-        # check_state(header)
         capture(header)
-        print('sleeping')
-        time.sleep(5)
-        print('awake')
+        print('transferring image')
+        transfer_image(frame)
+        frame+=1
+        print('done')
+        time.sleep(7)
+        print('next')
+        signal = 0
 
         
     
@@ -255,6 +267,15 @@ def sub_node():
     
     # rospy.spin()
 
+def act(signal, twist_msg2):
+    if signal == 3:
+       print('Going forward')
+       twist_msg2.linear.x = 0
+       twist_msg2.linear.y = 0
+       twist_msg2.linear.z = 0
+       twist_msg2.linear.z = 0
+        
+
 
 if __name__=="__main__":
 
@@ -277,14 +298,27 @@ if __name__=="__main__":
     th = 0
     status = 0
     
+    
+    
     try:
         pub_thread.wait_for_subscribers()
         pub_thread.update(x, y, z, th, speed, turn)
 
         print(msg)
         print(vels(speed,turn))
+        
+        start = 0
         while(1):
             key = getKey(settings, key_timeout)
+            # signal = get_signal()
+
+            # if signal in move_signals:
+            #     x = move_signals[signal][0]
+            
+            while(start == 0):
+                start = input('Press 1 to start ')
+            
+            sub_node()
             if key in moveBindings.keys():
                 x = moveBindings[key][0]
                 y = moveBindings[key][1]
@@ -311,7 +345,7 @@ if __name__=="__main__":
                     break
 
             pub_thread.update(x, y, z, th, speed, turn)
-            sub_node()
+            
 
     except Exception as e:
         print(e)

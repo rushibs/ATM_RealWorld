@@ -1,7 +1,7 @@
 import requests
 import json
 import time
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 # Ethernet connection ipv4 address: 192.168.1.100, mask: 255.255.255.0
 
@@ -94,4 +94,4 @@ with open(r'./test.jpeg','wb') as f:
     f.write(pic.content)
 
 
-plt.imshow(pic.content)
+# plt.imshow(pic.content)

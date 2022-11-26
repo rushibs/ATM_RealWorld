@@ -6,25 +6,25 @@
 import paramiko
 import time
 import os
-from cryptography.utils import CryptographyDeprecationWarning
-
-start_time = time.time()
+# from cryptography.utils import CryptographyDeprecationWarning
 
 
-ssh = paramiko.SSHClient()
-ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-ssh.connect(hostname='10.18.44.45', username='rushi', password='3596', port=22)
+def transfer_image(frame):
+    start_time = time.time()
 
-sftp_client = ssh.open_sftp()
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect(hostname='10.18.44.45', username='rushi', password='3596', port=22)
 
-sftp_client.put('/home/ai4ce/create_ws/src/create_robot/create_bringup/scripts/test.jpeg', '/home/rushi/a.jpeg')
+    sftp_client = ssh.open_sftp()
 
-sftp_client.get('/home/rushi/a.jpeg', '/home/ai4ce/create_ws/src/create_robot/create_bringup/scripts/a.jpeg')
+    sftp_client.put('/home/ai4ce/create_ws/src/create_robot/create_bringup/scripts/test.jpeg', '/home/rushi/frame_%d.jpeg' %frame) 
+    # sftp_client.get('/home/rushi/a.jpeg', '/home/ai4ce/create_ws/src/create_robot/create_bringup/scripts/a.jpeg')
 
-os.remove('/home/ai4ce/ATM_Jetson/create_robot/create_bringup/scripts/a.jpeg')
+    os.remove('/home/ai4ce/create_ws/src/create_robot/create_bringup/scripts/test.jpeg')
 
 
-print('done')
-print("--- %s seconds ---" % (time.time() - start_time))
-sftp_client.close()
-ssh.close()
+    print('done')
+    print("--- %s seconds ---" % (time.time() - start_time))
+    sftp_client.close()
+    ssh.close()
