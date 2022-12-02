@@ -11,7 +11,7 @@ from geometry_msgs.msg import Twist
 from geometry_msgs.msg import TwistStamped
 from create_msgs.msg import my_msg
 from camera import capture, check_state, connect
-from transfer_data import transfer_image
+from transfer_data import transfer_image, get_signal, stop_bot
 
 import sys
 from select import select
@@ -214,11 +214,6 @@ def odom_callback(msg):
     dist = msg.distance
     ang = msg.angle
 
-    signals = [1,2,3]
-    if signal in signals:
-        twist_msg2.linear.x = 0.1
-        twist_msg2.angular.z = 0
-        publisher.publish(twist_msg2)
 
     if dist >= (pose+0.25): 
         header = connect()
@@ -235,7 +230,7 @@ def odom_callback(msg):
         transfer_image(frame)
         frame+=1
         print('done')
-        time.sleep(7)
+        time.sleep(5)
         print('next')
         signal = 0
 
@@ -307,23 +302,28 @@ if __name__=="__main__":
         print(msg)
         print(vels(speed,turn))
         
-        start = 0
+        start = 1
         while(1):
-            key = getKey(settings, key_timeout)
-            # signal = get_signal()
+            key = getKey(settings, key_timeout)       
 
-            # if signal in move_signals:
-            #     x = move_signals[signal][0]
+            while(start == 1):                      ###### Switch to turn on the bot
+                start = input('Press 0 to start ')     
+            signal = get_signal()                       ###### read signal from csv file
             
-            while(start == 0):
-                start = input('Press 1 to start ')
-            
-            sub_node()
-            if key in moveBindings.keys():
+            print(type(signal))
+            if int(signal)==3:
+                x = 1
+                y = 0
+                z = 0
+                th = 0
+                print('done')
+
+            elif key in moveBindings.keys():
                 x = moveBindings[key][0]
                 y = moveBindings[key][1]
                 z = moveBindings[key][2]
                 th = moveBindings[key][3]
+
             elif key in speedBindings.keys():
                 speed = speed * speedBindings[key][0]
                 turn = turn * speedBindings[key][1]
@@ -341,11 +341,13 @@ if __name__=="__main__":
                 y = 0
                 z = 0
                 th = 0
-                if (key == '\x03'):
-                    break
+            
+            
+            if (key == '\x03'):
+                break
 
             pub_thread.update(x, y, z, th, speed, turn)
-            
+            sub_node()
 
     except Exception as e:
         print(e)

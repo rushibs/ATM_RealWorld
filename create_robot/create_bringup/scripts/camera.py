@@ -3,7 +3,7 @@
 import requests
 import json
 import time
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 # Ethernet connection ipv4 address: 192.168.1.100, mask: 255.255.255.0
 
@@ -52,33 +52,6 @@ def connect():
 
 
 def capture(header):  
-  # connect_param = {
-  #     "name": "camera._connect",
-  #     "parameters": {
-  #         "hw_time": "MMDDhhmm[[CC]YY][.ss]",
-  #         "time_zone": "EST-05:00/EDT-04:00"
-  #     }
-  # }
-
-  # # header for meta data
-  # connect_header = {
-  #     "Fingerprint":"",
-  #     "Content-Type":"application/json; charset=utf-8"
-  # }
-
-  # connect_response = requests.post('http://192.168.1.188:20000/osc/commands/execute', data=json.dumps(connect_param), headers = connect_header)
-  # my_fingerprint = connect_response.json()['results']['Fingerprint'] # access token for this specific connection
-
-  # ###### connection estbalished
-
-  # # You will have to check for state at least once per 10 second. But the maximum speed you can do is 1 check per second
-  # # check for state. 
-  # header = {
-  #     "Fingerprint":my_fingerprint,
-  #     "Content-Type":"application/json; charset=utf-8"
-  # }
-
-  # r = requests.post('http://192.168.1.188:20000/osc/state', headers=header)
 
 
   check_state(header)
@@ -141,9 +114,18 @@ def capture(header):
 
   with open(r'/home/ai4ce/create_ws/src/create_robot/create_bringup/scripts/test.jpeg','wb') as f:
       f.write(pic.content)
-  # print('sleeping')
-  # time.sleep(5)
-  # print('awake')
-  # c = requests.close('http://192.168.1.188:20000/osc/commands/execute')
 
-# plt.imshow(pic.content)
+
+
+###Trial
+
+# for i in range(50):
+#   start = time.time()
+#   if start < start+10:
+#     if i == 0:
+#       header = connect()
+#     capture(header)
+#     i += 1
+#   else:
+#     header = connect()
+#     capture(header)

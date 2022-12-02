@@ -25,5 +25,6 @@ odometry_sub = message_filters.Subscriber("/odom", Odometry)
 ats = message_filters.ApproximateTimeSynchronizer([lidar_sub, odometry_sub], queue_size=10, slop=0.05)
 ats.registerCallback(cloud)
 rospy.spin()
+
 bag1.close()
 bag2.close()
