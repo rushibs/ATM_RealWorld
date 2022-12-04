@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 #python3 -m pip install paramiko
 #sudo pip3 install pstats
@@ -40,7 +40,7 @@ def get_signal():
     f1 = open(myfilepath, "r")
     signal = f1.readlines()[-1]
     # print(ins)
-
+ 
     f1.close()
 
     return signal
@@ -49,11 +49,11 @@ def get_signal():
 def stop_bot():
     stop = [0]
     myfilepath = '/home/ai4ce/instructions.csv'
-    with open(myfilepath, '+a') as f:
+    with open(myfilepath, 'a') as f:
         w = csv.writer(f)
         w.writerow(stop)
 
+    f.close()
 
 # stop_bot() 
-
 

@@ -5,7 +5,6 @@ import threading
 import time
 import roslib; roslib.load_manifest('teleop_twist_keyboard')
 import rospy
-# from nav_msgs.msg import Odometry 
 from std_msgs.msg import Float64, Int64
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import TwistStamped
@@ -29,7 +28,13 @@ msg = """
 Reading from the keyboard  and Publishing to Twist!
 ---------------------------
 Moving around:
-   u    i    o
+   u    i    odef obstacle_callback():
+    obs_detect = Int64()
+    action = obs_detect.data
+    if action == 1:
+        print('Obstacle ahead')
+    elif action == 0:
+        print('Move')
    j    k    l
    m    ,    .
 For Holonomic mode (strafing), hold down the shift key:
@@ -40,19 +45,25 @@ For Holonomic mode (strafing), hold down the shift key:
 t : up (+z)
 b : down (-z)
 anything else : stop
-q/z : increase/decrease max speeds by 10%
+q/z : increase/decrease max speeds by 10%def obstacle_callback():
+    obs_detect = Int64()
+    action = obs_detect.data
+    if action == 1:
+        print('Obstacle ahead')
+    elif action == 0:
+        print('Move')
 w/x : increase/decrease only linear speed by 10%
 e/c : increase/decrease only angular speed by 10%
 CTRL-C to quit
 """
 
 moveBindings = {
-        '3':(1,0,0,0),
+        '3':(1,0,0,0),     #forward
         'o':(1,0,0,-1),
-        '1':(0,0,0,1),
-        '2':(0,0,0,-1),
+        '1':(0,0,0,1),     #left
+        '2':(0,0,0,-1),    #right
         'u':(1,0,0,1),
-        ',':(-1,0,0,0),
+        '4':(-1,0,0,0),    #back
         '.':(-1,0,0,1),
         'm':(-1,0,0,-1),
         'O':(1,-1,0,0),
@@ -203,7 +214,6 @@ def vels(speed, turn):
 pose = 0.0
 turn_angle = 0.0
 frame = 0
-signal = 3
 
 def odom_callback(msg):
     global pose, turn_angle, frame, signal
@@ -216,64 +226,66 @@ def odom_callback(msg):
 
 
     if dist >= (pose+0.25): 
-        header = connect()
-        print("Capture Image")
-        t_end = time.time() + 60 * 0.05
-        while time.time() < t_end:
-            twist_msg2.linear.x = 0
-            twist_msg2.angular.z = 0
-            publisher.publish(twist_msg2)
-           
-        pose = dist
-        capture(header)
-        print('transferring image')
-        transfer_image(frame)
-        frame+=1
-        print('done')
-        time.sleep(5)
-        print('next')
-        signal = 0
+        stop_bot()
+        if signal != 0:
+            header = connect()
+            print("Capture Image")
+            t_end = time.time() + 60 * 0.05
+            while time.time() < t_end:
+                twist_msg2.linear.x = 0
+                twist_msg2.angular.z = 0
+                publisher.publish(twist_msg2)
+            
+            pose = dist
+            capture(header)
+            print('transferring image')
+            transfer_image(frame)
+            frame+=1
+            print('done')
+            time.sleep(7.5)
+            print('next')
+   
 
-        
-    
+
     if ang >= (turn_angle+0.174532925):
-        # print("angle = ", ang)
-        print("Capture Image")
-        t_end = time.time() + 60 * 0.05
-        while time.time() < t_end:
-            twist_msg2.linear.x = 0
-            twist_msg2.angular.z = 0
-            publisher.publish(twist_msg2)
-        turn_angle = ang
-        
+        stop_bot()
+        if signal != 0:
+            header = connect()
+            print("Capture Image")
+            t_end = time.time() + 60 * 0.05
+            while time.time() < t_end:
+                twist_msg2.linear.x = 0
+                twist_msg2.angular.z = 0
+                publisher.publish(twist_msg2)
+            turn_angle = ang
+            capture(header)
+            print('transferring image')
+            transfer_image(frame)
+            frame+=1
+            print('done')
+            time.sleep(7.5)
+            print('next')
+          
+            
 
-# def obstacle_callback():
-#     obs_detect = Int64()
-#     action = obs_detect.data
-#     if action == 1:
-#         print('Obstacle ahead')
-#     elif action == 0:
-#         print('Move')
+# def obstacle_callback(data):
+#     print(data)
+    # obs_detect = Int64()
+    # action = obs_detect.data
+    
+    # if action == 1:
+    #     print('Obstacle ahead')
+    # elif action == 0:
+    #     print('Move')
 
 def sub_node():
-    # print("hello")
-    rospy.Subscriber("/mved_distance", my_msg, odom_callback)
-    # rospy.Subscriber("/detect", Int64, odom_callback)
     
-    # rospy.spin()
-
-def act(signal, twist_msg2):
-    if signal == 3:
-       print('Going forward')
-       twist_msg2.linear.x = 0
-       twist_msg2.linear.y = 0
-       twist_msg2.linear.z = 0
-       twist_msg2.linear.z = 0
-        
+    rospy.Subscriber("/mved_distance", my_msg, odom_callback)
+    # rospy.Subscriber("/detect", Int64, obstacle_callback)
 
 
 if __name__=="__main__":
-
+    
     settings = saveTerminalSettings()
     rospy.init_node('teleop_twist_keyboard1')
     speed = rospy.get_param("~speed", 0.1)
@@ -303,21 +315,32 @@ if __name__=="__main__":
         print(vels(speed,turn))
         
         start = 1
+        
         while(1):
             key = getKey(settings, key_timeout)       
 
             while(start == 1):                      ###### Switch to turn on the bot
-                start = input('Press 0 to start ')     
-            signal = get_signal()                       ###### read signal from csv file
+                start = input('Press 0 to start ') 
+         
             
-            print(type(signal))
+            signal = get_signal()                   ###### read signal from csv file
+            
             if int(signal)==3:
                 x = 1
                 y = 0
                 z = 0
-                th = 0
-                print('done')
-
+                th = 0   
+            elif int(signal)==1:
+                
+                x = 0
+                y = 0
+                z = 0
+                th = 1
+            elif int(signal)==2:
+                x = 0
+                y = 0
+                z = 0
+                th = -1
             elif key in moveBindings.keys():
                 x = moveBindings[key][0]
                 y = moveBindings[key][1]
@@ -348,6 +371,7 @@ if __name__=="__main__":
 
             pub_thread.update(x, y, z, th, speed, turn)
             sub_node()
+
 
     except Exception as e:
         print(e)
