@@ -20,7 +20,7 @@ def callback(msg):
     lidar_distances = scan
     min_distance = min(lidar_distances)
 
-    detect_pub = rospy.Publisher('detect', Int64, queue_size=10)
+    detect_pub = rospy.Publisher('detect', Int64, queue_size=1)
 
     if min_distance < SAFE_STOP_DISTANCE:
         # Obstacle is detected
@@ -29,7 +29,7 @@ def callback(msg):
         detect_pub.publish(obstacle_detect)
 
     else:
-        obstacle_detect.data = 1
+        obstacle_detect.data = 0
         detect_pub.publish(obstacle_detect)
         # rospy.loginfo('Distance of the obstacle : %f', min_distance)
            
@@ -39,17 +39,10 @@ def callback(msg):
 
 def main():
     rospy.init_node('obsctacle_node')
-    try:
-        rospy.Subscriber('scan', LaserScan, callback)
-        
-
-        rospy.spin()
-
-    except rospy.ROSInterruptException:
-        pass
-
+    rospy.Subscriber('scan', LaserScan, callback)
+  
 if __name__ == '__main__':
-    # rospy.init_node('obsctacle_node')
     main()
+    rospy.spin()
     
     

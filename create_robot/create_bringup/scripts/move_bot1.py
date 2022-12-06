@@ -28,13 +28,7 @@ msg = """
 Reading from the keyboard  and Publishing to Twist!
 ---------------------------
 Moving around:
-   u    i    odef obstacle_callback():
-    obs_detect = Int64()
-    action = obs_detect.data
-    if action == 1:
-        print('Obstacle ahead')
-    elif action == 0:
-        print('Move')
+   u    i    o
    j    k    l
    m    ,    .
 For Holonomic mode (strafing), hold down the shift key:
@@ -45,13 +39,7 @@ For Holonomic mode (strafing), hold down the shift key:
 t : up (+z)
 b : down (-z)
 anything else : stop
-q/z : increase/decrease max speeds by 10%def obstacle_callback():
-    obs_detect = Int64()
-    action = obs_detect.data
-    if action == 1:
-        print('Obstacle ahead')
-    elif action == 0:
-        print('Move')
+q/z : increase/decrease max speeds by 10%
 w/x : increase/decrease only linear speed by 10%
 e/c : increase/decrease only angular speed by 10%
 CTRL-C to quit
@@ -244,7 +232,7 @@ def odom_callback(msg):
             print('done')
             time.sleep(7.5)
             print('next')
-   
+
 
 
     if ang >= (turn_angle+0.174532925):
@@ -268,20 +256,29 @@ def odom_callback(msg):
           
             
 
-# def obstacle_callback(data):
-#     print(data)
-    # obs_detect = Int64()
-    # action = obs_detect.data
-    
-    # if action == 1:
-    #     print('Obstacle ahead')
+def obs(msg):
+    # print(msg.data)
+    obs_detect = Int64()
+    action = obs_detect.data
+    print(action)
+    if int(action) == 1:
+        # print('stop')
+        publisher = rospy.Publisher('cmd_vel', Twist, queue_size = 10)
+        twist_msg3 = TwistMsg()
+        t_end = time.time() + 60 * 0.05
+        while time.time() < t_end:  
+            print('stop') 
+            twist_msg3.linear.x = 0
+            twist_msg3.angular.z = 0
+            publisher.publish(twist_msg3)
     # elif action == 0:
     #     print('Move')
+        
 
 def sub_node():
     
+    rospy.Subscriber("/detect", Int64, obs)
     rospy.Subscriber("/mved_distance", my_msg, odom_callback)
-    # rospy.Subscriber("/detect", Int64, obstacle_callback)
 
 
 if __name__=="__main__":
@@ -311,18 +308,19 @@ if __name__=="__main__":
         pub_thread.wait_for_subscribers()
         pub_thread.update(x, y, z, th, speed, turn)
 
-        print(msg)
-        print(vels(speed,turn))
+        # print(msg)
+        # print(vels(speed,turn))
         
         start = 1
         
         while(1):
             key = getKey(settings, key_timeout)       
 
+            
             while(start == 1):                      ###### Switch to turn on the bot
                 start = input('Press 0 to start ') 
          
-            
+            # rospy.Subscriber("/detect", Int64, obs)
             signal = get_signal()                   ###### read signal from csv file
             
             if int(signal)==3:

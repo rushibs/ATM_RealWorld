@@ -101,13 +101,13 @@ class MovementDetector():
     def publish_moved_distance(self, mved_distance, turn_angle):
         None
 
-    def obstacle_callback():
-        obs_detect = Int64()
-        action = obs_detect.data
-        if action == 1:
-            print('Obstacle ahead')
-        elif action == 0:
-            print('Move')
+    # def obstacle_callback():
+    #     obs_detect = Int64()
+    #     action = obs_detect.data
+    #     if action == 1:
+    #         print('Obstacle ahead')
+    #     elif action == 0:
+    #         print('Move')
  
 
 
@@ -118,6 +118,6 @@ if __name__ == '__main__':
     rospy.init_node('movement_detector_node', anonymous=True)
     
     rospy.Subscriber("/odom", Odometry, movement_detector.odom_callback)
-    rospy.Subscriber("/detect", Int64, movement_detector.obstacle_callback)
+    # rospy.Subscriber("/detect", Int64, movement_detector.obstacle_callback)
     
     rospy.spin()
