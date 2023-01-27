@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 # from json import detect_encoding
 import threading
@@ -6,11 +6,12 @@ import time
 import roslib; roslib.load_manifest('teleop_twist_keyboard')
 import rospy
 from std_msgs.msg import Float64, Int64
+# from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import TwistStamped
 from create_msgs.msg import my_msg
 from camera import capture, check_state, connect
-from transfer_data import transfer_image, get_signal, stop_bot
+from transfer_data import transfer_image, get_signal, stop_bot, captured_flag
 
 import sys
 from select import select
@@ -23,6 +24,18 @@ else:
 import cv2
 
 TwistMsg = Twist
+
+# image_taking_flag = 1 # 1 means okay to take image, 0 means don't take image
+# prev_last_line = '1' # this variable holds the number of action in the instructions.csv
+
+# def csv_lastline(csv):
+#     # this function returns the last lines in a csv file
+#     f1 = open(csv, "r")
+    
+#     flag = f1.readlines()[-1]
+
+#     f1.close()
+#     return flag
 
 msg = """
 Reading from the keyboard  and Publishing to Twist!
@@ -44,12 +57,11 @@ w/x : increase/decrease only linear speed by 10%
 e/c : increase/decrease only angular speed by 10%
 CTRL-C to quit
 """
-
 moveBindings = {
-        '3':(1,0,0,0),     #forward
+        '1':(1,0,0,0),     #forward
         'o':(1,0,0,-1),
-        '1':(0,0,0,1),     #left
-        '2':(0,0,0,-1),    #right
+        '2':(0,0,0,1),     #left
+        '3':(0,0,0,-1),    #right
         'u':(1,0,0,1),
         '4':(-1,0,0,0),    #back
         '.':(-1,0,0,1),
@@ -202,9 +214,13 @@ def vels(speed, turn):
 pose = 0.0
 turn_angle = 0.0
 frame = 0
+temp = 0
 
 def odom_callback(msg):
-    global pose, turn_angle, frame, signal
+    global pose, turn_angle, frame, signal, temp
+
+    # prev_last_line = csv_lastline('instructions.csv')
+
     publisher = rospy.Publisher('cmd_vel', Twist, queue_size = 10)
     twist_msg2 = TwistMsg()
     distance = my_msg()
@@ -212,10 +228,19 @@ def odom_callback(msg):
     dist = msg.distance
     ang = msg.angle
 
-
-    if dist >= (pose+0.25): 
+    dist_error = dist - pose
+    if dist_error >= 0.3:
+        pose = pose + (dist_error - 0.25)
+    if dist >= (pose+0.25):
+    # if (pose-dist) >= 0.25:
+        # print(ang)
         stop_bot()
-        if signal != 0:
+        # if image_taking_flag == 1:
+        if int(signal) != 0:
+            print('dist:', dist)
+            print('pose:', pose)
+            captured = 1                  #### Flag to write the LiDAR values
+            captured_flag(captured,frame)
             header = connect()
             print("Capture Image")
             t_end = time.time() + 60 * 0.05
@@ -223,44 +248,90 @@ def odom_callback(msg):
                 twist_msg2.linear.x = 0
                 twist_msg2.angular.z = 0
                 publisher.publish(twist_msg2)
-            
+
+            while True:
+                # this while loop ensure that the robot is not moving at all
+                if twist_msg2.linear.x == 0 and twist_msg2.angular.z == 0:
+                    break
+
             pose = dist
             capture(header)
             print('transferring image')
+            # captured = 1                  #### Flag to write the LiDAR values
+            # captured_flag(captured,frame)
             transfer_image(frame)
             frame+=1
             print('done')
-            time.sleep(7.5)
+            time.sleep(9)
             print('next')
+            print('dist:', dist)
+            print('pose:', pose)
+        #     image_taking_flag = 0
 
 
+        # curr_last_line = csv_lastline('instructions.csv') 
+        # if prev_last_line != '0' or curr_last_line != '0' # check that we don't have consecutive 0s
+        #     image_taking_flag = 1 # update the flag and the action number
+        # prev_last_line = curr_last_line # update the previous last line
+
+    ang_error = ang - turn_angle
+    if ang_error >= 0.2:
+        turn_angle = turn_angle + (ang_error - 0.17)s
 
     if ang >= (turn_angle+0.174532925):
+    # if (turn_angle - ang) >= (0.174532925):
+        # print(ang)
         stop_bot()
-        if signal != 0:
+        
+        # if image_taking_flag == 1:
+        if int(signal) != 0:
+            print('ang:', ang)
+            print('turn_angle:', turn_angle)
+            # captured = 1                  #### Flag to allow to write the LiDAR values
+            # captured_flag(captured,frame)
             header = connect()
             print("Capture Image")
             t_end = time.time() + 60 * 0.05
             while time.time() < t_end:
                 twist_msg2.linear.x = 0
-                twist_msg2.angular.z = 0
+                twist_msg2.angular.z = 0  
                 publisher.publish(twist_msg2)
+            
+            while True:
+            # this while loop ensure that the robot is not moving at all
+                if twist_msg2.linear.x == 0 and twist_msg2.angular.z == 0:
+                    break
+            
             turn_angle = ang
+            
             capture(header)
             print('transferring image')
+            # captured = 1                  #### Flag to allow to write the LiDAR values
+            # captured_flag(captured, frame)
             transfer_image(frame)
             frame+=1
             print('done')
-            time.sleep(7.5)
+            time.sleep(9)
             print('next')
-          
+
+        #     image_taking_flag = 0
+
+
+        # curr_last_line = csv_lastline('instructions.csv') 
+        # if prev_last_line != '0' or curr_last_line != '0' # check that we don't have consecutive 0s
+        #     image_taking_flag = 1 # update the flag and the action number
+        # prev_last_line = curr_last_line # update the previous last line
+        
+        
+
+        # print(turn_angle)
             
 
 def obs(msg):
     # print(msg.data)
     obs_detect = Int64()
     action = obs_detect.data
-    print(action)
+    # print(action)
     if int(action) == 1:
         # print('stop')
         publisher = rospy.Publisher('cmd_vel', Twist, queue_size = 10)
@@ -277,7 +348,7 @@ def obs(msg):
 
 def sub_node():
     
-    rospy.Subscriber("/detect", Int64, obs)
+    # rospy.Subscriber("/detect", Int64, obs)
     rospy.Subscriber("/mved_distance", my_msg, odom_callback)
 
 
@@ -286,8 +357,8 @@ if __name__=="__main__":
     settings = saveTerminalSettings()
     rospy.init_node('teleop_twist_keyboard1')
     speed = rospy.get_param("~speed", 0.1)
-    turn = rospy.get_param("~turn", 1.0)
-    repeat = rospy.get_param("~repeat_rate", 10.0)
+    turn = rospy.get_param("~turn", 0.1)
+    repeat = rospy.get_param("~repe1at_rate", 10.0)
     key_timeout = rospy.get_param("~key_timeout", 0.5)
     stamped = rospy.get_param("~stamped", False)
     twist_frame = rospy.get_param("~frame_id", '')
@@ -318,27 +389,27 @@ if __name__=="__main__":
 
             
             while(start == 1):                      ###### Switch to turn on the bot
-                start = input('Press 0 to start ') 
+                start = input("Press 0 to start ") 
          
             # rospy.Subscriber("/detect", Int64, obs)
             signal = get_signal()                   ###### read signal from csv file
             
-            if int(signal)==3:
+            if int(signal)==3:          #right
+                x = 0
+                y = 0
+                z = 0
+                th = -1   
+            elif int(signal)==1:       #forwards
+                
                 x = 1
                 y = 0
                 z = 0
-                th = 0   
-            elif int(signal)==1:
-                
+                th = 0
+            elif int(signal)==2:        #left
                 x = 0
                 y = 0
                 z = 0
                 th = 1
-            elif int(signal)==2:
-                x = 0
-                y = 0
-                z = 0
-                th = -1
             elif key in moveBindings.keys():
                 x = moveBindings[key][0]
                 y = moveBindings[key][1]

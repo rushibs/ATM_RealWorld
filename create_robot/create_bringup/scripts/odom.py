@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 from cmath import pi
 from signal import pause
@@ -11,6 +11,7 @@ from geometry_msgs.msg import Point, Twist, Quaternion
 from create_msgs.msg import my_msg
 from std_msgs.msg import Float64, Int64
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
+from transfer_data import get_signal
 
 class MovementDetector():
     def __init__(self):
@@ -44,14 +45,15 @@ class MovementDetector():
     
     def odom_callback(self, msg):
 
+        rate = rospy.Rate(99999)
+
         if self.flag == 2:
             NewPosition = msg.pose.pose.position
             NewOrientation = msg.pose.pose.orientation
             self.mved_distance.distance += self.calculate_distance(NewPosition, self._current_position)
             self.turn_angle.angle += self.calculate_angle(NewOrientation, self._current_orientation)
             self.moved_pub = rospy.Publisher('/mved_distance', my_msg, queue_size=10)
-            self.moved_pub.publish(self.mved_distance.distance, self.turn_angle.angle)
-
+            self.moved_pub.publish(self.mved_distance.distance, self.turn_angle.angle) 
             self.updatecurrent_positin(NewPosition)
             self.updatecurrent_orientation(NewOrientation)
             
@@ -59,7 +61,8 @@ class MovementDetector():
         elif self.flag == 1:
             self.get_init_position(msg)
             self.flag = 2
-    
+
+        rate.sleep()
 
     def updatecurrent_positin(self, new_position):
         self._current_position.x = new_position.x

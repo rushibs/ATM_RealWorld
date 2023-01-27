@@ -2,11 +2,15 @@
 <launch>
 
   <include file="$(find create_bringup)//home/ai4ce/create_ws/src/create_robot/create_bringup/launch/create_2.launch"/>
+  <include file="$(find velodyne_pointcloud)//home/ai4ce/create_ws/src/velodyne/velodyne_pointcloud/launch/VLP16_points.launch"/>
 
-  <node name="teleop_twist_keyboard1" pkg="create_bringup" type="teleop1.py" 	output="screen"/>
-  <!-- <node name="cam_node" pkg="create_bringup" type="ros_cam.py" output="screen"/> -->
+  <!-- <node name="teleop_twist_keyboard1" pkg="create_bringup" type="teleop1.py" 	output="screen"/> -->
+  <node name="obstacle_node" pkg="create_bringup" type="obstacle_backup.py" 	output="screen"/>
   <node name="odom_node" pkg="create_bringup" type="odom.py" 	output="screen"/>
-  <node name="obstacle_node" pkg="create_bringup" type="obstacle.py" 	output="screen"/>
+  <node name="move_bot1" pkg="create_bringup" type="move_bot1.py" 	output="screen"/>
+  <!-- <node name="cam_node" pkg="create_bringup" type="ros_cam.py" output="screen"/> -->
+  
+  
 
   <!-- <arg name="set_frame_id" default="base_scan"/>
   <arg name="lds_model" default="$(env LDS_MODEL)" doc="LDS MODEL [LDS-01, LDS-02]"/> -->

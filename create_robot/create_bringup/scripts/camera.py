@@ -13,7 +13,7 @@ import time
 def check_state(header):
         try:
             r = requests.post('http://192.168.1.188:20000/osc/state', headers=header)  ###CHECK FOR r
-            time.sleep(2)
+            # time.sleep(2)
 
         except:
             print("hi")
@@ -119,7 +119,7 @@ def capture(header):
 
 ###Trial
 
-# for i in range(50):
+# for i in range(2):
 #   start = time.time()
 #   if start < start+10:
 #     if i == 0:
@@ -128,4 +128,4 @@ def capture(header):
 #     i += 1
 #   else:
 #     header = connect()
-#     capture(header)
+#     capture(header) 
