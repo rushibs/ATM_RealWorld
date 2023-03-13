@@ -2,7 +2,7 @@
 <launch>
 
   <include file="$(find create_bringup)//home/ai4ce/create_ws/src/create_robot/create_bringup/launch/create_2.launch"/>
-  <include file="$(find velodyne_pointcloud)//home/ai4ce/create_ws/src/velodyne/velodyne_pointcloud/launch/VLP16_points.launch"/>
+  <!-- <include file="$(find velodyne_pointcloud)//home/ai4ce/create_ws/src/velodyne/velodyne_pointcloud/launch/VLP16_points.launch"/> -->
 
   <!-- <node name="teleop_twist_keyboard1" pkg="create_bringup" type="teleop1.py" 	output="screen"/> -->
   <node name="obstacle_node" pkg="create_bringup" type="obstacle_backup.py" 	output="screen"/>

@@ -51,7 +51,7 @@ def connect():
   return header
 
 
-def capture(header):  
+def capture(header, frame):  
 
 
   check_state(header)
@@ -112,7 +112,9 @@ def capture(header):
 
   pic = requests.get(pic_url)
 
-  with open(r'/home/ai4ce/create_ws/src/create_robot/create_bringup/scripts/test.jpeg','wb') as f:
+  # with open(r'/home/ai4ce/create_ws/src/create_robot/create_bringup/scripts/test.jpeg','wb') as f:
+  #     f.write(pic.content)
+  with open('/home/ai4ce/ATM_data/ATM/imgs/frame_%d.jpeg' %frame,'wb') as f:
       f.write(pic.content)
 
 
@@ -129,3 +131,6 @@ def capture(header):
 #   else:
 #     header = connect()
 #     capture(header) 
+
+# header = connect()
+# capture(header, 207)

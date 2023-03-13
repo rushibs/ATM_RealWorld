@@ -213,7 +213,7 @@ def vels(speed, turn):
 
 pose = 0.0
 turn_angle = 0.0
-frame = 0
+frame = 243
 temp = 0
 
 def odom_callback(msg):
@@ -230,10 +230,19 @@ def odom_callback(msg):
 
     dist_error = dist - pose
     if dist_error >= 0.3:
-        pose = pose + (dist_error - 0.25)
+        # pose = pose + (dist_error - 0.25)
+        n = dist_error%0.25
+        pose = dist + (n*0.25)
+        # turn_angle = ang
+
     if dist >= (pose+0.25):
-    # if (pose-dist) >= 0.25:
-        # print(ang)
+        
+        # dist_error = dist - pose
+        # if dist_error >= 0.3:
+        #     # pose = pose + (dist_error - 0.25)
+        #     pose = dist 
+        turn_angle = ang
+
         stop_bot()
         # if image_taking_flag == 1:
         if int(signal) != 0:
@@ -255,17 +264,19 @@ def odom_callback(msg):
                     break
 
             pose = dist
-            capture(header)
-            print('transferring image')
+            turn_angle = ang
+            capture(header, frame)
+            # print('transferring image')
             # captured = 1                  #### Flag to write the LiDAR values
             # captured_flag(captured,frame)
-            transfer_image(frame)
+
+            # transfer_image(frame)
             frame+=1
             print('done')
             time.sleep(9)
             print('next')
-            print('dist:', dist)
-            print('pose:', pose)
+            # print('dist:', dist)
+            # print('pose:', pose)
         #     image_taking_flag = 0
 
 
@@ -276,19 +287,27 @@ def odom_callback(msg):
 
     ang_error = ang - turn_angle
     if ang_error >= 0.2:
-        turn_angle = turn_angle + (ang_error - 0.17)s
+        n = ang_error%2
+        turn_angle = ang + (n*0.175)
+        # pose = dist
+    #     print('turn angle after error', turn_angle)
 
     if ang >= (turn_angle+0.174532925):
-    # if (turn_angle - ang) >= (0.174532925):
-        # print(ang)
+
+        # ang_error = ang - turn_angle
+        # if ang_error >= 0.2:
+        #     turn_angle = ang
+        pose = dist
+            # print('turn angle after error', turn_angle)
+
         stop_bot()
         
         # if image_taking_flag == 1:
         if int(signal) != 0:
             print('ang:', ang)
             print('turn_angle:', turn_angle)
-            # captured = 1                  #### Flag to allow to write the LiDAR values
-            # captured_flag(captured,frame)
+            captured = 1                  #### Flag to allow to write the LiDAR values
+            captured_flag(captured,frame)
             header = connect()
             print("Capture Image")
             t_end = time.time() + 60 * 0.05
@@ -297,18 +316,18 @@ def odom_callback(msg):
                 twist_msg2.angular.z = 0  
                 publisher.publish(twist_msg2)
             
-            while True:
-            # this while loop ensure that the robot is not moving at all
+            while True:            # this while loop ensure that the robot is not moving at all
                 if twist_msg2.linear.x == 0 and twist_msg2.angular.z == 0:
                     break
             
+            pose = dist
             turn_angle = ang
-            
-            capture(header)
-            print('transferring image')
+            capture(header, frame)
+            # print('transferring image')
             # captured = 1                  #### Flag to allow to write the LiDAR values
             # captured_flag(captured, frame)
-            transfer_image(frame)
+            
+            # transfer_image(frame)
             frame+=1
             print('done')
             time.sleep(9)
@@ -357,7 +376,7 @@ if __name__=="__main__":
     settings = saveTerminalSettings()
     rospy.init_node('teleop_twist_keyboard1')
     speed = rospy.get_param("~speed", 0.1)
-    turn = rospy.get_param("~turn", 0.1)
+    turn = rospy.get_param("~turn", 0.3 )
     repeat = rospy.get_param("~repe1at_rate", 10.0)
     key_timeout = rospy.get_param("~key_timeout", 0.5)
     stamped = rospy.get_param("~stamped", False)
